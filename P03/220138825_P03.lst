@@ -1,0 +1,387 @@
+Microsoft (R) Macro Assembler Version 6.11		    08/08/24 17:00:39
+src\220138825_P03.asm					     Page 1 - 1
+
+
+				;	Update all of this information to reflect your own details and the prac
+				;	Author:     RE RADEBE
+				;	Practical Assignment 03
+				.386
+				.MODEL FLAT ; Flat memory model
+				.STACK 4096 ; 4096 bytes
+
+				INCLUDE io.inc
+			      C ;
+			      C ; Simple I/O Routines - Version 2
+			      C ;
+			      C 
+			      C IFNDEF IO_INC
+ = 1			      C IO_INC equ <1>
+			      C 
+			      C OutputStr PROTO NEAR32 STDCALL :DWORD
+			      C OutputInt PROTO NEAR32 STDCALL :DWORD
+			      C OutputFloat PROTO NEAR32 STDCALL :DWORD
+			      C OutputFloat8 PROTO NEAR32 STDCALL :QWORD
+			      C InputInt PROTO NEAR32 STDCALL
+			      C InputStr PROTO NEAR32 STDCALL :DWORD, :DWORD
+			      C 
+			      C ELSE
+			      C ENDIF
+			      C 
+
+				; Exit function
+				ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD
+
+				; The data section stores all global variables
+ 00000000			.DATA
+				; STRING PROMPTS
+ 00000000 45 6E 74 65 72	strHeartRate			BYTE	"Enter the Heart Rate", 0
+	   20 74 68 65 20
+	   48 65 61 72 74
+	   20 52 61 74 65
+	   00
+ 00000015 45 6E 74 65 72	strAge					BYTE	"Enter your Age: ",0
+	   20 79 6F 75 72
+	   20 41 67 65 3A
+	   20 00
+ 00000026 3A 00			strColon				BYTE	58,0
+ 00000028 48 65 61 72 74	strArrayInput			BYTE	"Heart Rates Input: ",0
+	   20 52 61 74 65
+	   73 20 49 6E 70
+	   75 74 3A 20 00
+ 0000003C 50 65 72 63 65	strArrayOutput			BYTE	"Percentages Output: ",0
+	   6E 74 61 67 65
+	   73 20 4F 75 74
+	   70 75 74 3A 20
+	   00
+ 00000051 54 68 65 20 49	strIntensity			BYTE	"The Intensity: ",0
+	   6E 74 65 6E 73
+	   69 74 79 3A 20
+	   00
+ 00000061 4E 6F 6E 65 00	strNone					BYTE	"None", 0
+ 00000066 4C 69 67 68 74	strLight				BYTE	"Light", 0
+	   00
+ 0000006C 4D 6F 64 65 72	strModerate				BYTE	"Moderate", 0
+	   61 74 65 00
+ 00000075 56 69 67 6F 72	strVigorous				BYTE	"Vigorous", 0
+	   6F 75 73 00
+ 0000007E 0A 00			strNL					BYTE	10,0
+ 00000080 20 00			strSpace				BYTE	32,0
+ 00000082 50 72 65 73 73	strExit					BYTE	"Press 0 to exit or any positive number to contunue"
+	   20 30 20 74 6F
+	   20 65 78 69 74
+	   20 6F 72 20 61
+	   6E 79 20 70 6F
+	   73 69 74 69 76
+	   65 20 6E 75 6D
+	   62 65 72 20 74
+	   6F 20 63 6F 6E
+	   74 75 6E 75 65
+
+				;User Input Data variables
+ 000000B4  00000008 [		ArrayHR					DWORD	8 DUP(?)
+	    00000000
+	   ]
+ 000000D4 00000000		Age						DWORD	?
+ 000000D8  00000008 [		ArrayPercentage			DWORD	8 DUP(?)
+	    00000000
+	   ]
+ 000000F8 00000000		AVGPercentage			DWORD	?
+ 000000FC  0000000F [		Intensity				BYTE	15 DUP(?)
+	    00
+	   ]
+
+
+				; The code section may contain multiple tags such as _start, which is the entry
+				; point of this assembly program
+ 00000000			.CODE
+ 00000000			_start:
+ 00000000				; Most of your initial code will be under the _start tag.
+					; The _start tag is just a memory address referenced by the Public indicator
+					; highlighting which functions are available to calling functions.
+					; _start gets called by the operating system to start this process.
+ 00000000  8D 1D 000000B4 R		LEA ebx, ArrayHR
+ 00000006  8D 15 000000D8 R		LEA edx, ArrayPercentage
+ 0000000C				Heart_Rates:
+ 0000000C  B9 00000001				mov ecx, 1
+
+						;==================Heart Rate 01================
+						INVOKE 		OutputStr, ADDR strHeartRate
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE 		OutputInt, ecx
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE		OutputStr, ADDR strColon
+						INVOKE 		InputInt
+ 00000044  89 03				mov 		DWORD PTR [ebx], eax
+
+						;==================Heart Rate 02================
+
+ 00000046  41					inc			ecx
+ 00000047  83 C3 04				add			ebx, 4
+
+						INVOKE 		OutputStr, ADDR strHeartRate
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE 		OutputInt, ecx
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE		OutputStr, ADDR strColon
+						INVOKE 		InputInt
+ 0000007D  89 03				mov 		DWORD PTR [ebx], eax
+
+						;==================Heart Rate 03================
+
+ 0000007F  41					inc			ecx
+ 00000080  83 C3 04				add			ebx, 4
+
+						INVOKE 		OutputStr, ADDR strHeartRate
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE 		OutputInt, ecx
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE		OutputStr, ADDR strColon
+						INVOKE 		InputInt
+ 000000B6  89 03				mov 		DWORD PTR [ebx], eax
+
+						;==================Heart Rate 04================
+
+ 000000B8  41					inc			ecx
+ 000000B9  83 C3 04				add			ebx, 4
+
+						INVOKE 		OutputStr, ADDR strHeartRate
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE 		OutputInt, ecx
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE		OutputStr, ADDR strColon
+						INVOKE 		InputInt
+ 000000EF  89 03				mov 		DWORD PTR [ebx], eax
+
+						;==================Heart Rate 05================
+
+ 000000F1  41					inc			ecx
+ 000000F2  83 C3 04				add			ebx, 4
+
+						INVOKE 		OutputStr, ADDR strHeartRate
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE 		OutputInt, ecx
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE		OutputStr, ADDR strColon
+						INVOKE 		InputInt
+ 00000128  89 03				mov 		DWORD PTR [ebx], eax
+
+						;==================Heart Rate 06================
+
+ 0000012A  41					inc			ecx
+ 0000012B  83 C3 04				add			ebx, 4
+
+						INVOKE 		OutputStr, ADDR strHeartRate
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE 		OutputInt, ecx
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE		OutputStr, ADDR strColon
+						INVOKE 		InputInt
+ 00000161  89 03				mov 		DWORD PTR [ebx], eax
+
+						;==================Heart Rate 07================
+
+ 00000163  41					inc			ecx
+ 00000164  83 C3 04				add			ebx, 4
+
+						INVOKE 		OutputStr, ADDR strHeartRate
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE 		OutputInt, ecx
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE		OutputStr, ADDR strColon
+						INVOKE 		InputInt
+ 0000019A  89 03				mov 		DWORD PTR [ebx], eax
+
+						;==================Heart Rate 08================
+
+ 0000019C  41					inc			ecx
+ 0000019D  83 C3 04				add			ebx, 4
+
+						INVOKE 		OutputStr, ADDR strHeartRate
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE 		OutputInt, ecx
+						INVOKE		OutputStr, ADDR	strSpace
+						INVOKE		OutputStr, ADDR strColon
+						INVOKE 		InputInt
+ 000001D3  89 03				mov 		DWORD PTR [ebx], eax
+
+						;==================Input Age================
+						INVOKE		OutputStr, ADDR strAge
+						INVOKE		InputInt
+ 000001E4  A3 000000D4 R			mov Age		, eax		
+
+						;==================Calculating the Percentage================
+ 000001E9  B9 00000000				mov ecx, 0
+ 000001EE					percentages:
+ 000001EE  8B 04 8B					mov eax, [ebx+ecx*4]
+ 000001F1  2B 05 000000D4 R				sub	eax, Age
+ 000001F7  BA 00000000					mov edx, 0
+ 000001FC  BB 000000DC					mov ebx, 220
+ 00000201  2B 1D 000000D4 R				sub ebx, Age
+ 00000207  99						cdq
+ 00000208  F7 F3					div	ebx
+ 0000020A  83 F8 64					cmp	eax, 100
+ 0000020D  7E 05					jle value
+ 0000020F  B8 00000064					mov	eax, 100
+ 00000214						value:
+ 00000214  89 04 8D					mov [ArrayPercentage+ecx*4], eax
+	   000000D8 R
+ 0000021B  41						inc ecx
+ 0000021C  83 F9 08					cmp ecx, 8
+ 0000021F  75 CD					jne percentages
+
+						;==================Output Array================
+						INVOKE	OutputStr, ADDR strArrayOutput
+ 0000022B  B9 00000000				mov		ecx, 0
+ 00000230					ArrayOutput:
+ 00000230  A1 000000D8 R				mov		eax, ArrayPercentage
+							INVOKE	OutputInt, eax
+							INVOKE	OutputStr, ADDR strNL
+ 00000245  41						inc		ecx
+ 00000246  83 F9 08					cmp		ecx, 8
+ 00000249  75 E5					jne		ArrayOutput
+
+						;==================Calculating Average================
+ 0000024B  33 C0				xor			eax, eax
+ 0000024D  B9 00000000				mov			ecx, 0
+ 00000252					AverageP:
+ 00000252  03 05 000000D8 R				add		eax, ArrayPercentage
+ 00000258  41						inc		ecx
+ 00000259  83 F9 08					cmp		ecx, 8
+ 0000025C  75 F4					jne		AverageP
+ 0000025E  BB 00000008				mov			ebx, 8
+ 00000263  99					cdq
+ 00000264  F7 F3				div			ebx
+ 00000266  A3 000000F8 R			mov			AVGPercentage, eax
+
+						;==================Heart Rate 01================
+
+ 0000026B  A1 000000F8 R				mov			eax, AVGPercentage
+ 00000270  83 F8 3C					cmp			eax, 60
+ 00000273  7C 0C					jl			None
+ 00000275  83 F8 45					cmp			eax, 69
+ 00000278  7E 0E					jle			Light
+ 0000027A  83 F8 4F					cmp			eax, 79
+ 0000027D  7E 10					jle			Moderate
+ 0000027F  EB 15					jmp			Vigorous
+
+ 00000281					None:
+ 00000281  B8 00000061 R			mov			eax, OFFSET strNone
+ 00000286  EB 15				jmp			DisplayIntensity
+
+ 00000288					Light:
+ 00000288  B8 00000066 R			mov			eax, OFFSET strLight
+ 0000028D  EB 0E				jmp			DisplayIntensity
+
+ 0000028F					Moderate:
+ 0000028F  B8 0000006C R			mov			eax, OFFSET strModerate
+ 00000294  EB 07				jmp			DisplayIntensity
+
+ 00000296					Vigorous:
+ 00000296  B8 00000075 R			mov			eax, OFFSET strVigorous
+ 0000029B  EB 00				jmp			DisplayIntensity
+
+ 0000029D					DisplayIntensity:
+						INVOKE		OutputStr, eax
+						INVOKE		OutputStr, ADDR strNL
+
+						;==================Prompt for Exit================
+						INVOKE	OutputStr, ADDR	strExit
+						INVOKE	InputInt
+ 000002BC  83 F8 00				cmp		eax, 0
+ 000002BF  74 06				je		endHeart_Rates
+ 000002C1  0F 8F FFFFFD45			jg 		Heart_Rates
+
+ 000002C7					endHeart_Rates:
+
+					; We call the Operating System ExitProcess system call to close the process.
+					INVOKE ExitProcess, 0
+ 000002CE			Public _start
+				END
+Microsoft (R) Macro Assembler Version 6.11		    08/08/24 17:00:39
+src\220138825_P03.asm					     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000010B DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000002CE DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000002CE Private
+  Heart_Rates  . . . . . . . . .	L Near	 0000000C _TEXT	
+  percentages  . . . . . . . . .	L Near	 000001EE _TEXT	
+  value  . . . . . . . . . . . .	L Near	 00000214 _TEXT	
+  ArrayOutput  . . . . . . . . .	L Near	 00000230 _TEXT	
+  AverageP . . . . . . . . . . .	L Near	 00000252 _TEXT	
+  None . . . . . . . . . . . . .	L Near	 00000281 _TEXT	
+  Light  . . . . . . . . . . . .	L Near	 00000288 _TEXT	
+  Moderate . . . . . . . . . . .	L Near	 0000028F _TEXT	
+  Vigorous . . . . . . . . . . .	L Near	 00000296 _TEXT	
+  DisplayIntensity . . . . . . .	L Near	 0000029D _TEXT	
+  endHeart_Rates . . . . . . . .	L Near	 000002C7 _TEXT	
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+InputInt . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+InputStr . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputFloat8 . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputFloat  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputInt  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputStr  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+AVGPercentage  . . . . . . . . .	DWord	 000000F8 _DATA	
+Age  . . . . . . . . . . . . . .	DWord	 000000D4 _DATA	
+ArrayHR  . . . . . . . . . . . .	DWord	 000000B4 _DATA	
+ArrayOutput  . . . . . . . . . .	L Near	 00000230 _TEXT	
+ArrayPercentage  . . . . . . . .	DWord	 000000D8 _DATA	
+AverageP . . . . . . . . . . . .	L Near	 00000252 _TEXT	
+DisplayIntensity . . . . . . . .	L Near	 0000029D _TEXT	
+Heart_Rates  . . . . . . . . . .	L Near	 0000000C _TEXT	
+IO_INC . . . . . . . . . . . . .	Text   	 1
+Intensity  . . . . . . . . . . .	Byte	 000000FC _DATA	
+Light  . . . . . . . . . . . . .	L Near	 00000288 _TEXT	
+Moderate . . . . . . . . . . . .	L Near	 0000028F _TEXT	
+None . . . . . . . . . . . . . .	L Near	 00000281 _TEXT	
+Vigorous . . . . . . . . . . . .	L Near	 00000296 _TEXT	
+_start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+endHeart_Rates . . . . . . . . .	L Near	 000002C7 _TEXT	
+percentages  . . . . . . . . . .	L Near	 000001EE _TEXT	
+strAge . . . . . . . . . . . . .	Byte	 00000015 _DATA	
+strArrayInput  . . . . . . . . .	Byte	 00000028 _DATA	
+strArrayOutput . . . . . . . . .	Byte	 0000003C _DATA	
+strColon . . . . . . . . . . . .	Byte	 00000026 _DATA	
+strExit  . . . . . . . . . . . .	Byte	 00000082 _DATA	
+strHeartRate . . . . . . . . . .	Byte	 00000000 _DATA	
+strIntensity . . . . . . . . . .	Byte	 00000051 _DATA	
+strLight . . . . . . . . . . . .	Byte	 00000066 _DATA	
+strModerate  . . . . . . . . . .	Byte	 0000006C _DATA	
+strNL  . . . . . . . . . . . . .	Byte	 0000007E _DATA	
+strNone  . . . . . . . . . . . .	Byte	 00000061 _DATA	
+strSpace . . . . . . . . . . . .	Byte	 00000080 _DATA	
+strVigorous  . . . . . . . . . .	Byte	 00000075 _DATA	
+value  . . . . . . . . . . . . .	L Near	 00000214 _TEXT	
+
+	   0 Warnings
+	   0 Errors

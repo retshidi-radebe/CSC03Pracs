@@ -1,0 +1,310 @@
+Microsoft (R) Macro Assembler Version 6.11		    09/19/24 16:55:25
+src\220138825_P07.asm					     Page 1 - 1
+
+
+				;	Update all of this information to reflect your own details and the prac
+				;	Author:     RE Radebe 220138825
+				;	Practical Assigment 07
+				.386
+				.MODEL FLAT ; Flat memory model
+				.STACK 4096 ; 4096 bytes
+
+				INCLUDE io.inc
+			      C ;
+			      C ; Simple I/O Routines - Version 2
+			      C ;
+			      C 
+			      C IFNDEF IO_INC
+ = 1			      C IO_INC equ <1>
+			      C 
+			      C OutputStr PROTO NEAR32 STDCALL :DWORD
+			      C OutputInt PROTO NEAR32 STDCALL :DWORD
+			      C OutputFloat PROTO NEAR32 STDCALL :DWORD
+			      C OutputFloat8 PROTO NEAR32 STDCALL :QWORD
+			      C InputInt PROTO NEAR32 STDCALL
+			      C InputStr PROTO NEAR32 STDCALL :DWORD, :DWORD
+			      C 
+			      C ELSE
+			      C ENDIF
+			      C 
+
+				; Exit function
+				ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD
+
+				; The data section stores all global variables
+ 00000000			.DATA
+				;==========================Global Vars=========================
+ 00000000  00000064 [			strInput			BYTE	100 DUP(?)					; input storage
+	    00
+	   ]
+ 00000064  00000064 [			strReversed			BYTE	100 DUP(?)					; reversed storage
+	    00
+	   ]
+ 000000C8 00				searchChar			BYTE	?							; search Character
+ 000000C9 00				replaceChar			BYTE	?							; replace character
+
+				;=========================String Prompts=======================
+ 000000CA 45 6E 74 65 72		StringPrompt		BYTE	"Enter a string: ", 0
+	   20 61 20 73 74
+	   72 69 6E 67 3A
+	   20 00
+ 000000DB 53 65 61 72 63		SearchPrompt		BYTE	"Search Character: ", 0
+	   68 20 43 68 61
+	   72 61 63 74 65
+	   72 3A 20 00
+ 000000EE 52 65 70 6C 61		ReplacePrompt		BYTE	"Replace with: ", 0
+	   63 65 20 77 69
+	   74 68 3A 20 00
+ 000000FD 4D 6F 64 69 66		ModPrompt			BYTE	"Modified String: ", 0
+	   69 65 64 20 53
+	   74 72 69 6E 67
+	   3A 20 00
+ 0000010F 52 65 76 65 72		OutputPrompt		BYTE	"Reversed string: ", 0
+	   73 65 64 20 73
+	   74 72 69 6E 67
+	   3A 20 00
+ 00000121 50 72 65 73 73		strExit				BYTE	"Press 0 to exit or any positive number to continue: ", 0	
+	   20 30 20 74 6F
+	   20 65 78 69 74
+	   20 6F 72 20 61
+	   6E 79 20 70 6F
+	   73 69 74 69 76
+	   65 20 6E 75 6D
+	   62 65 72 20 74
+	   6F 20 63 6F 6E
+	   74 69 6E 75 65
+	   3A 20 00
+
+
+				; The code section may contain multiple tags such as _start, which is the entry
+				; point of this assembly program
+ 00000000			.CODE
+				;==================ReplaceCharacters Function====================
+ 00000000			replaceCharacters PROC NEAR32
+ 00000000  55				push		ebp
+ 00000001  8B EC			mov			ebp, esp
+ 00000003  BE 00000000 R		mov			esi, offset strInput
+
+ 00000008			loop_replace:
+ 00000008  8A 06			mov			al, [esi]			; Load byte
+ 0000000A  3C 00			cmp			al, 0				; null-terminator
+ 0000000C  74 12			je			replace_done		; break the looop if the end of string
+
+ 0000000E  3A 05 000000C8 R		cmp			al, searchChar		; Check the search character
+ 00000014  75 07			jne			char_copy			; Copy the character if no
+ 00000016  A0 000000C9 R		mov			al, replaceChar		; raplace if they match
+ 0000001B  88 06			mov			[esi], al
+
+ 0000001D			char_copy:
+ 0000001D  46				inc			esi							; store byte
+ 0000001E  EB E8			jmp			loop_replace				; repeat for next chars
+
+ 00000020			replace_done:
+ 00000020  8B E5			mov			esp, ebp
+ 00000022  5D				pop			ebp
+ 00000023  C3				ret	
+ 00000024			replaceCharacters ENDP
+
+				;=================================GetStringLength Function================================
+ 00000024			getStringLen	PROC	NEAR32
+ 00000024  55				push		ebp
+ 00000025  8B EC			mov			ebp, esp
+ 00000027  BE 00000000 R		mov			esi, offset	strInput
+ 0000002C  33 C9			xor			ecx, ecx
+
+ 0000002E			lengthLoop:
+ 0000002E  8A 04 31			mov			al, [esi + ecx]
+ 00000031  3C 00			cmp			al, 0
+ 00000033  74 03			je			endlength	
+ 00000035  41				inc			ecx
+ 00000036  EB F6			jmp			lengthLoop
+
+ 00000038			endLength:
+ 00000038  8B C1			mov			eax, ecx
+ 0000003A  8B E5			mov			esp, ebp
+ 0000003C  5D				pop			ebp
+
+ 0000003D  C3				ret		
+ 0000003E			getStringLen	ENDP
+
+				;==================================ReversedString Function================================
+ 0000003E			reversedString PROC NEAR32
+ 0000003E  55				push		ebp
+ 0000003F  8B EC			mov			ebp, esp
+ 00000041  BE 00000000 R		mov			esi, offset strInput
+ 00000046  BF 00000064 R		mov			edi, offset strReversed
+ 0000004B  E8 FFFFFFD4			call		getStringLen				;Length input string
+
+ 00000050  48				dec 		eax
+ 00000051  8B C8			mov			ecx, eax
+
+ 00000053			reverse_loop:
+ 00000053  8A 04 31			mov			al, [esi + ecx]		; load Byte
+ 00000056  88 07			mov			[edi], al			; Store it
+ 00000058  47				inc			edi					; Move forward
+ 00000059  49				dec			ecx					; Move backward
+ 0000005A  83 F9 FF			cmp			ecx, -1		
+ 0000005D  7F F4			jg			reverse_loop		; stop reversing if ecx is less zero
+
+ 0000005F  C6 07 00			mov			BYTE	PTR [edi], 0
+ 00000062  8B E5			mov			esp, ebp
+ 00000064  5D				pop			ebp
+ 00000065  C3				ret			
+ 00000066			reversedString ENDP
+
+ 00000066			InputChar PROC	NEAR32
+				    ; Backup registers
+ 00000066  55			    push 		ebp
+ 00000067  8B EC		    mov 		ebp, esp
+
+				    ; Read one character from standard input (file descriptor 0)
+ 00000069  B8 00000003		    mov 		eax, 3      ; Syscall number for sys_read
+ 0000006E  BB 00000000		    mov 		ebx, 0      ; File descriptor for stdin
+ 00000073  8D 4C 24 04		    lea 		ecx, [esp+4]; Store the character in a temporary variable on the stack
+ 00000077  BA 00000001		    mov 		edx, 1      ; Read one byte (one character)
+ 0000007C  CD 80		    int 		80h         ; Trigger interrupt for syscall
+
+				    ; Move the character from the stack into the AL register
+ 0000007E  8A 44 24 04		    mov 		al, BYTE PTR [esp+4]
+
+				    ; Restore registers
+ 00000082  8B E5		    mov 		esp, ebp
+ 00000084  5D			    pop 		ebp
+ 00000085  C3			    ret
+ 00000086			InputChar	ENDP
+
+				;====================================Main Function================================
+ 00000086			_start:
+ 00000086				; Most of your initial code will be under the _start tag.
+					; The _start tag is just a memory address referenced by the Public indicator
+					; highlighting which functions are available to calling functions.
+					; _start gets called by the operating system to start this process.
+				    ; Prompt user for string input
+ 00000086  8D 05 000000CA R	    lea  eax, StringPrompt
+ 0000008C  50			    push eax
+ 0000008D  E8 00000000 E	    call OutputStr
+
+ 00000092  B8 00000064		    mov  eax, 100                    ; Limit input size to 100 chars
+ 00000097  50			    push eax
+ 00000098  8D 05 00000000 R	    lea  eax, strInput
+ 0000009E  50			    push eax
+ 0000009F  E8 00000000 E	    call InputStr                    ; Get the user input string
+
+				    ; Prompt for search character
+ 000000A4  8D 05 000000DB R	    lea  eax, SearchPrompt
+ 000000AA  50			    push eax
+ 000000AB  E8 00000000 E	    call OutputStr
+ 000000B0  E8 FFFFFFB1		    call InputChar                   ; Get the character to search for
+ 000000B5  A2 000000C8 R	    mov  searchChar, al              ; Store it in searchChar
+
+				    ; Prompt for replacement character
+ 000000BA  8D 05 000000EE R	    lea  eax, ReplacePrompt
+ 000000C0  50			    push eax
+ 000000C1  E8 00000000 E	    call OutputStr
+ 000000C6  E8 FFFFFF9B		    call InputChar                   ; Get the character to replace with
+ 000000CB  A2 000000C9 R	    mov  replaceChar, al             ; Store it in replaceChar
+
+				    ; Call replaceCharacters to perform replacement
+ 000000D0  E8 FFFFFF2B		    call replaceCharacters
+
+				    ; Display the modified string
+ 000000D5  8D 05 000000FD R	    lea  eax, ModPrompt
+ 000000DB  50			    push eax
+ 000000DC  E8 00000000 E	    call OutputStr
+
+ 000000E1  8D 05 00000000 R	    lea  eax, strInput
+ 000000E7  50			    push eax
+ 000000E8  E8 00000000 E	    call OutputStr                   ; Output modified string
+
+				    ; Call reverseString to reverse the string
+ 000000ED  E8 FFFFFF4C		    call reversedString
+
+				    ; Display the reversed string
+ 000000F2  8D 05 0000010F R	    lea  eax, OutputPrompt
+ 000000F8  50			    push eax
+ 000000F9  E8 00000000 E	    call OutputStr
+
+ 000000FE  8D 05 00000064 R	    lea  eax, strReversed
+ 00000104  50			    push eax
+ 00000105  E8 00000000 E	    call OutputStr                   ; Output reversed string	
+
+				;========================================Exit  Prompt====================================
+ 0000010A  8D 1D 00000121 R			lea						ebx, strExit
+ 00000110  53					push					ebx
+ 00000111  E8 00000000 E			call					OutputStr
+ 00000116  E8 00000000 E			call					InputInt
+ 0000011B  83 F8 00				cmp						eax, 0
+ 0000011E  0F 85 FFFFFF62			jne						_start	
+
+					; We call the Operating System ExitProcess system call to close the process.
+					INVOKE ExitProcess, 0
+ 0000012B			Public _start
+				END
+Microsoft (R) Macro Assembler Version 6.11		    09/19/24 16:55:25
+src\220138825_P07.asm					     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000156 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000012B DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+$$$$$$00005  . . . . . . . . . .	P Near	 00000086 _TEXT	Length= 000000A5 Private
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+InputChar  . . . . . . . . . . .	P Near	 00000066 _TEXT	Length= 00000020 Public
+InputInt . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+InputStr . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputFloat8 . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputFloat  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputInt  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputStr  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+getStringLen . . . . . . . . . .	P Near	 00000024 _TEXT	Length= 0000001A Public
+  lengthLoop . . . . . . . . . .	L Near	 0000002E _TEXT	
+  endLength  . . . . . . . . . .	L Near	 00000038 _TEXT	
+replaceCharacters  . . . . . . .	P Near	 00000000 _TEXT	Length= 00000024 Public
+  loop_replace . . . . . . . . .	L Near	 00000008 _TEXT	
+  char_copy  . . . . . . . . . .	L Near	 0000001D _TEXT	
+  replace_done . . . . . . . . .	L Near	 00000020 _TEXT	
+reversedString . . . . . . . . .	P Near	 0000003E _TEXT	Length= 00000028 Public
+  reverse_loop . . . . . . . . .	L Near	 00000053 _TEXT	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+IO_INC . . . . . . . . . . . . .	Text   	 1
+ModPrompt  . . . . . . . . . . .	Byte	 000000FD _DATA	
+OutputPrompt . . . . . . . . . .	Byte	 0000010F _DATA	
+ReplacePrompt  . . . . . . . . .	Byte	 000000EE _DATA	
+SearchPrompt . . . . . . . . . .	Byte	 000000DB _DATA	
+StringPrompt . . . . . . . . . .	Byte	 000000CA _DATA	
+_start . . . . . . . . . . . . .	L Near	 00000086 _TEXT	Public
+replaceChar  . . . . . . . . . .	Byte	 000000C9 _DATA	
+searchChar . . . . . . . . . . .	Byte	 000000C8 _DATA	
+strExit  . . . . . . . . . . . .	Byte	 00000121 _DATA	
+strInput . . . . . . . . . . . .	Byte	 00000000 _DATA	
+strReversed  . . . . . . . . . .	Byte	 00000064 _DATA	
+
+	   0 Warnings
+	   0 Errors

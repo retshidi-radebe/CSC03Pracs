@@ -1,0 +1,329 @@
+Microsoft (R) Macro Assembler Version 6.11		    08/22/24 17:00:46
+src\220138825_P05.asm					     Page 1 - 1
+
+
+				;	Update all of this information to reflect your own details and the prac
+				;	Author:     RE Radebe 220138825
+				;	Practical Assessment 05
+				.386
+				.MODEL FLAT ; Flat memory model
+				.STACK 4096 ; 4096 bytes
+
+				INCLUDE	io.inc
+			      C ;
+			      C ; Simple I/O Routines - Version 2
+			      C ;
+			      C 
+			      C IFNDEF IO_INC
+ = 1			      C IO_INC equ <1>
+			      C 
+			      C OutputStr PROTO NEAR32 STDCALL :DWORD
+			      C OutputInt PROTO NEAR32 STDCALL :DWORD
+			      C OutputFloat PROTO NEAR32 STDCALL :DWORD
+			      C OutputFloat8 PROTO NEAR32 STDCALL :QWORD
+			      C InputInt PROTO NEAR32 STDCALL
+			      C InputStr PROTO NEAR32 STDCALL :DWORD, :DWORD
+			      C 
+			      C ELSE
+			      C ENDIF
+			      C 
+
+				; Exit function
+				ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD
+
+				; The data section stores all global variables
+ 00000000			.DATA
+					;========================================String prompts=========================================
+ 00000000 50 6C 65 61 73		strAge						BYTE	"Please Enter your age:	", 0
+	   65 20 45 6E 74
+	   65 72 20 79 6F
+	   75 72 20 61 67
+	   65 3A 09 00
+ 00000018 50 6C 65 61 73		strHRF						BYTE	"Please Enter your HRF: ", 0
+	   65 20 45 6E 74
+	   65 72 20 79 6F
+	   75 72 20 48 52
+	   46 3A 20 00
+ 00000030 45 6E 74 65 72		strLevel					BYTE	"Enter level value at the index ", 0
+	   20 6C 65 76 65
+	   6C 20 76 61 6C
+	   75 65 20 61 74
+	   20 74 68 65 20
+	   69 6E 64 65 78
+	   20 00
+ 00000050 45 6E 74 65 72		strDuration					BYTE	"Enter duration value at the index ", 0
+	   20 64 75 72 61
+	   74 69 6F 6E 20
+	   76 61 6C 75 65
+	   20 61 74 20 74
+	   68 65 20 69 6E
+	   64 65 78 20 00
+ 00000073 54 68 65 20 73		strScores					BYTE	"The scores are: ", 0
+	   63 6F 72 65 73
+	   20 61 72 65 3A
+	   20 00
+ 00000084 50 72 65 73 73		strExit						BYTE	"Press 0 to exit or any positive number to contunue: ", 0
+	   20 30 20 74 6F
+	   20 65 78 69 74
+	   20 6F 72 20 61
+	   6E 79 20 70 6F
+	   73 69 74 69 76
+	   65 20 6E 75 6D
+	   62 65 72 20 74
+	   6F 20 63 6F 6E
+	   74 75 6E 75 65
+	   3A 20 00
+					;========================================Input variables =======================================
+ 000000B9  0000000A [			Levels						DWORD	10 DUP(?)
+	    00000000
+	   ]
+ 000000E1  0000000A [			Durations					DWORD	10 DUP(?)
+	    00000000
+	   ]
+ 00000109  0000000A [			Scores						DWORD	10 DUP(?)
+	    00000000
+	   ]
+
+				; The code section may contain multiple tags such as _start, which is the entry
+				; point of this assembly program
+ 00000000			.CODE
+					;========================================Input Function with it's paras====================================
+ 00000000				input PROC NEAR32
+ 00000000  55					push					ebp
+ 00000001  8B EC				mov						ebp, esp
+ 00000003  51					push					ecx				; Count
+ 00000004  53					push 					ebx				; Array address
+
+ 00000005  8B 75 08				mov						esi, [ebp+8]
+ 00000008  8B 4D 0C				mov						ecx, [ebp+12]		;This counts the elements
+
+ 0000000B				InputLoop:
+ 0000000B  8D 15 00000030 R			lea						edx, strLevel
+ 00000011  E8 00000000 E			call					OutputStr
+ 00000016  E8 00000000 E			call					InputInt
+ 0000001B  89 06				mov						[esi], eax		;Stores the input value
+ 0000001D  83 C6 04				add						esi, 4			; moving to the element of arayy
+ 00000020  E2 E9				loop					InputLoop		
+
+ 00000022  5B					pop						ebx
+ 00000023  59					pop						ecx
+ 00000024  5D					pop						ebp
+ 00000025  C3					ret						
+ 00000026				input ENDP
+					;========================================HealthScore Function with it's paras====================================
+ 00000026				healthScore PROC NEAR32
+ 00000026  55					push					ebp
+ 00000027  8B EC				mov						ebp, esp
+
+ 00000029  8B 45 08				mov						eax, [ebp+8]				;Age
+ 0000002C  F7 FB				idiv					ebx
+ 0000002E  83 C0 05				add						eax, 5
+ 00000031  50					push					eax
+
+ 00000032  8B 45 0C				mov						eax, [ebp+12]
+ 00000035  0F AF 45 10				imul					eax, [ebp+16]
+ 00000039  0F AF 45 14				imul					eax, [ebp+20]
+
+ 0000003D  5B					pop						ebx
+ 0000003E  99					cdq
+ 0000003F  F7 FB				idiv					ebx
+ 00000041  5D					pop						ebp
+ 00000042  C3					ret
+ 00000043				healthScore ENDP		
+
+					;========================================FinalScore Function with it's paras====================================
+
+ 00000043				finalScore PROC	NEAR32
+ 00000043  55					push					ebp
+ 00000044  8B EC				mov						ebp, esp
+ 00000046  53					push					ebx					
+ 00000047  51					push					ecx
+ 00000048  52					push					edx
+
+ 00000049  8B 75 0C				mov						esi, [ebp+12]			; Levels array
+ 0000004C  8B 7D 10				mov						edi, [ebp+16]			; Duration arrya
+ 0000004F  8B 5D 14				mov						ebx, [ebp+20]			; Score array
+ 00000052  B9 0000000A				mov						ecx, 10				; Loop counter
+
+ 00000057				ScoreLoop:
+ 00000057  8B 06				mov						eax, [esi]			; Load level
+ 00000059  0F AF 07				imul					eax, [edi]			; Multiply by duration
+ 0000005C  03 45 08				add						eax, [ebp+8]			; Adding HRF
+ 0000005F  FF 75 08				push					DWORD ptr [ebp+8]	;Age
+ 00000062  FF 37				push					DWORD ptr [edi]		;Duration
+ 00000064  FF 36				push					DWORD ptr [esi]
+ 00000066  FF 75 18				push					DWORD ptr [ebp+24]
+ 00000069  E8 FFFFFFB8				call					healthScore
+ 0000006E  89 03				mov						[ebx], eax			; Storing the results in the score array
+ 00000070  83 C6 04				add						esi, 4				; Moving to the next level element
+ 00000073  83 C7 04				add						edi, 4				; Moving to the next duration element
+ 00000076  83 C3 04				add						ebx, 4				; Moving to the next score element
+ 00000079  E2 DC				loop					ScoreLoop
+
+ 0000007B  5A					pop						edx
+ 0000007C  59					pop						ecx
+ 0000007D  5B					pop						ebx
+ 0000007E  5D					pop						ebp
+ 0000007F  C3					ret
+ 00000080				finalScore ENDP
+
+					;========================================Display Function with it's paras====================================
+
+ 00000080				display PROC NEAR32
+ 00000080  55					push					ebp
+ 00000081  8B EC				mov						ebp, esp
+ 00000083  51					push					ecx
+ 00000084  53					push					ebx
+
+ 00000085  8B 75 08				mov						esi, [ebp+8]
+ 00000088  8B 4D 0C				mov						ecx, [ebp+12]			; Counting the elements
+
+ 0000008B  8D 15 00000073 R			lea						edx, strScores
+ 00000091  52					push					edx
+ 00000092  E8 00000000 E			call					OutputStr
+
+ 00000097				DisplayLoop:
+ 00000097  8B 06				mov						eax, [esi]			; Loading the score
+ 00000099  50					push					eax	
+ 0000009A  E8 00000000 E			call					OutputInt			; Displayong the score
+ 0000009F  83 C6 04				add						esi, 4				; Moving to the next element of array
+ 000000A2  E2 F3				loop					DisplayLoop
+
+ 000000A4  5B					pop						ebx
+ 000000A5  59					pop						ecx
+ 000000A6  5D					pop						ebp
+ 000000A7  C3					ret
+ 000000A8				display	ENDP
+
+					;========================================The main====================================
+ 000000A8			_start:
+					; Most of your initial code will be under the _start tag.
+					; The _start tag is just a memory address referenced by the Public indicator
+					; highlighting which functions are available to calling functions.
+					; _start gets called by the operating system to start this process.
+ 000000A8				TopOfMain:
+ 000000A8  83 EC 08				sub						esp, 8
+
+						; This is the imputs for Age and HRF
+ 000000AB  8D 1D 00000000 R			lea						ebx, strAge
+ 000000B1  53					push					ebx
+ 000000B2  E8 00000000 E			call					OutputStr
+ 000000B7  E8 00000000 E			call					InputInt
+ 000000BC  89 44 24 04				mov						[esp+4], eax			;Age storage
+
+ 000000C0  8D 1D 00000018 R			lea						ebx, strHRF
+ 000000C6  53					push					ebx
+ 000000C7  E8 00000000 E			call					OutputStr
+ 000000CC  E8 00000000 E			call					InputInt
+ 000000D1  89 04 24				mov						[esp], eax				; HRF storage
+
+						; These are the inputs for levels and duration
+ 000000D4  8D 1D 000000B9 R			lea						ebx, Levels
+ 000000DA  B8 0000000A				mov						eax, 10
+ 000000DF  50					push					eax
+ 000000E0  53					push					ebx
+ 000000E1  E8 FFFFFF1A				call					input
+
+ 000000E6  8D 1D 000000E1 R			lea						ebx, Durations
+ 000000EC  B8 0000000A				mov						eax, 10
+ 000000F1  50					push					eax
+ 000000F2  53					push					ebx
+ 000000F3  E8 FFFFFF08				call					input
+
+						;Calculating and storing the scores
+ 000000F8  8D 1D 000000B9 R			lea						ebx, Levels
+ 000000FE  8D 0D 000000E1 R			lea						ecx, Durations
+ 00000104  8D 15 00000109 R			lea						edx, Scores
+ 0000010A  8B 44 24 04				mov						eax, [esp+4]			;Loading Age
+ 0000010E  8B 1C 24				mov						ebx, [esp]				;Loading HRF	
+ 00000111  52					push					edx
+ 00000112  51					push					ecx
+ 00000113  53					push					ebx
+ 00000114  E8 FFFFFF2A				call					finalScore
+
+						; Displaying the scores
+ 00000119  8D 1D 00000109 R			lea						ebx, Scores
+ 0000011F  B8 0000000A				mov						eax, 10
+ 00000124  50					push					eax
+ 00000125  53					push					ebx
+ 00000126  E8 FFFFFF55				call					display
+
+					;========================================Exit  Prompt====================================
+ 0000012B  8D 1D 00000084 R			lea						ebx, strExit
+ 00000131  53					push					ebx
+ 00000132  E8 00000000 E			call					OutputStr
+ 00000137  E8 00000000 E			call					InputInt
+ 0000013C  83 F8 00				cmp						eax, 0
+ 0000013F  0F 85 FFFFFF63			jne						TopOfMain	
+
+ 00000145  83 C4 08				add						esp, 8
+
+					; We call the Operating System ExitProcess system call to close the process.
+					INVOKE ExitProcess, 0
+ 0000014F			Public _start
+				END
+Microsoft (R) Macro Assembler Version 6.11		    08/22/24 17:00:46
+src\220138825_P05.asm					     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000131 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000014F DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+$$$$$$00005  . . . . . . . . . .	P Near	 000000A8 _TEXT	Length= 000000A7 Private
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+InputInt . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+InputStr . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputFloat8 . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputFloat  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputInt  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+OutputStr  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+display  . . . . . . . . . . . .	P Near	 00000080 _TEXT	Length= 00000028 Public
+  DisplayLoop  . . . . . . . . .	L Near	 00000097 _TEXT	
+finalScore . . . . . . . . . . .	P Near	 00000043 _TEXT	Length= 0000003D Public
+  ScoreLoop  . . . . . . . . . .	L Near	 00000057 _TEXT	
+healthScore  . . . . . . . . . .	P Near	 00000026 _TEXT	Length= 0000001D Public
+input  . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000026 Public
+  InputLoop  . . . . . . . . . .	L Near	 0000000B _TEXT	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+Durations  . . . . . . . . . . .	DWord	 000000E1 _DATA	
+IO_INC . . . . . . . . . . . . .	Text   	 1
+Levels . . . . . . . . . . . . .	DWord	 000000B9 _DATA	
+Scores . . . . . . . . . . . . .	DWord	 00000109 _DATA	
+TopOfMain  . . . . . . . . . . .	L Near	 000000A8 _TEXT	
+_start . . . . . . . . . . . . .	L Near	 000000A8 _TEXT	Public
+strAge . . . . . . . . . . . . .	Byte	 00000000 _DATA	
+strDuration  . . . . . . . . . .	Byte	 00000050 _DATA	
+strExit  . . . . . . . . . . . .	Byte	 00000084 _DATA	
+strHRF . . . . . . . . . . . . .	Byte	 00000018 _DATA	
+strLevel . . . . . . . . . . . .	Byte	 00000030 _DATA	
+strScores  . . . . . . . . . . .	Byte	 00000073 _DATA	
+
+	   0 Warnings
+	   0 Errors

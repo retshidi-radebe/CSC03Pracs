@@ -1,0 +1,86 @@
+Microsoft (R) Macro Assembler Version 6.11		    07/18/24 16:31:32
+src\220138825_P00.asm					     Page 1 - 1
+
+
+				;	Update all of this information to reflect your own details and the prac
+				;	Author:     Dr J du Toit
+				;	Template document
+				.386
+				.MODEL FLAT ; Flat memory model
+				.STACK 4096 ; 4096 bytes
+
+				; Exit function
+				ExitProcess PROTO NEAR32 stdcall, dwExitCode:DWORD
+
+				; The data section stores all global variables
+ 00000000			.DATA
+ 00000000 000000A1		AHR DWORD 161	;AHR value
+ 00000004 0000006D		Duration DWORD 109	;Duration value
+ 00000008 00003023		Steps DWORD 12323	;Steps value
+ 0000000C 00000000		Calories DWORD ?
+
+				; The code section may contain multiple tags such as _start, which is the entry
+				; point of this assembly program
+ 00000000			.CODE
+ 00000000			_start:
+ 00000000				;The simplied formula := (AHR x Duration + 5 x Steps)/100
+ 00000000  A1 00000000 R		mov eax, AHR		;result := AHR
+ 00000005  0F AF 05			imul eax, Duration	;result := AHR x Duration
+	   00000004 R
+ 0000000C  8B 0D 00000008 R		mov ecx, Steps		;result := Steps
+ 00000012  6B C9 05			imul ecx, 5			;result := Steps x 5
+ 00000015  03 C1			add eax, ecx		;result := (AHR x Duration) + (Steps x 5)
+ 00000017  BB 00000064			mov ebx, 100		;Divisor
+ 0000001C  99				cdq
+ 0000001D  F7 FB			idiv ebx			;result := (AHR x Duration + 5 x Steps)/100
+ 0000001F  89 1D 0000000C R		mov Calories, ebx	;Answer
+
+					; We call the Operating System ExitProcess system call to close the process.
+					INVOKE ExitProcess, 0
+ 0000002C			Public _start
+				END
+Microsoft (R) Macro Assembler Version 6.11		    07/18/24 16:31:32
+src\220138825_P00.asm					     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00001000 DWord	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000010 DWord	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000002C DWord	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+$$$$$$00001  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000002C Private
+ExitProcess  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+AHR  . . . . . . . . . . . . . .	DWord	 00000000 _DATA	
+Calories . . . . . . . . . . . .	DWord	 0000000C _DATA	
+Duration . . . . . . . . . . . .	DWord	 00000004 _DATA	
+Steps  . . . . . . . . . . . . .	DWord	 00000008 _DATA	
+_start . . . . . . . . . . . . .	L Near	 00000000 _TEXT	Public
+
+	   0 Warnings
+	   0 Errors
